@@ -1,0 +1,28 @@
+name: Azure Functions Demo
+on: push
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v3.5.1
+      with:
+        # Set always-auth in npmrc.
+        always-auth: false
+        # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
+        node-version: 16.x
+        # File containing the version Spec of the version to use.  Examples: .nvmrc, .node-version, .tool-versions.
+    - name: Packaging
+      shell: bash
+      run: |
+        npm install
+        npm run bulid
+    - name: Azure Functions Action
+      uses: Azure/functions-action@v1.4.8
+      with:
+        # Name of the Azure Function App
+        app-name: "azure-functions-demo-quotto"
+        # Path to package or folder. *.zip or a folder to deploy
+        package: .
+        # Publish profile (*.publishsettings) file contents with web deploy secrets
+        publish-profile: ${{env.AZURE_PUBLISH_PROFILE}}
