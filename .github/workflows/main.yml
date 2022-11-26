@@ -22,7 +22,7 @@ jobs:
     name: Build Application
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3.0.1
 
     # Setup Node
     - name: Use Node ${{ env.NODE_VERSION }}
@@ -57,7 +57,7 @@ jobs:
     # Uploading application to artifact store
     - name: Upload Application to Build Artifact
       continue-on-error: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: buildartifacts
         path: buildartifacts
@@ -70,7 +70,7 @@ jobs:
     # Uploading Arm Template to artifact store
     - name: Upload Arm templates to Artifact
       continue-on-error: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: deploymenttemplates
         path: deploymenttemplates
@@ -92,7 +92,7 @@ jobs:
         sudo apt-get install azure-functions-core-tools-3
 
     - name: Download Build Artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       continue-on-error: false
       with:
         name: buildartifacts
@@ -103,7 +103,7 @@ jobs:
         unzip -qq ./buildartifacts/Application.zip -d .
 
     - name: Download Arm Template
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       continue-on-error: false
       with:
         name: deploymenttemplates
