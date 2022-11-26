@@ -1,26 +1,138 @@
-name: Azure Functions Demo
-on: push
+name: Build and Deploy to Azure Functions
+on:
+  push:
+    branches-ignore:
+      - main
+
+env:
+  APPNAME: ${{ env.GITHUB_REPOSITORY_OWNER }}-demo-functions
+  APPLICATIONPATH: app
+  ARMTEMPLATE_PATH: .arm
+  RESOURCEGROUPNAME: ${{ env.GITHUB_REPOSITORY_OWNER }}-demo-rg
+  LOCATION: Japan East
+  HOSTINGPLAN: ${{ env.GITHUB_REPOSITORY_OWNER }}-demo
+  STORAGEACCOUNTNAME: ${{ env.GITHUB_REPOSITORY_OWNER }}demo
+  APPINSIGHTSLOCATION: Japan East
+  NODE_VERSION: '8.11.1'
+  SUBSCRIPTIONID: 44603a6b-332f-482f-a1bb-0e9643b3fc4b
+  SKU: Dynamic Y1
+
 jobs:
-  build-and-deploy:
+  build:
+    name: Build Application
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Setup Node.js environment
-      uses: actions/setup-node@v3.5.1
+
+    # Setup Node
+    - name: Use Node ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v1
       with:
-        # Set always-auth in npmrc.
-        always-auth: false
-        # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
-        node-version: 16.x
-    - name: Packaging
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Install dependancies and build app
+      continue-on-error: false
       run: |
+        cd ${{ env.APPLICATIONPATH }}
         npm install
-    - name: Azure Functions Action
-      uses: Azure/functions-action@v1.4.8
+
+    # Run Unit Tests
+    - name: Run unit tests
+      continue-on-error: false
+      run: |
+        cd ${{ env.APPLICATIONPATH }}
+        npm run test
+
+    - name: Make directories for artifact upload
+      continue-on-error: false
+      run: |
+        mkdir buildartifacts
+        mkdir deploymenttemplates
+
+    # Archive build artifact
+    - name: Archive Application
+      run: |
+        zip -qq -r ./buildartifacts/Application.zip ./${{ env.APPLICATIONPATH }}
+
+    # Uploading application to artifact store
+    - name: Upload Application to Build Artifact
+      continue-on-error: false
+      uses: actions/upload-artifact@v2
       with:
-        # Name of the Azure Function App
-        app-name: "azure-functions-demo-quotto"
-        # Path to package or folder. *.zip or a folder to deploy
-        package: .
-        # Publish profile (*.publishsettings) file contents with web deploy secrets
-        publish-profile: ${{secrets.AZURE_FUNCTIONS_PROFILE}}
+        name: buildartifacts
+        path: buildartifacts
+
+    # Archive Arm template
+    - name: Archive ArmTemplates
+      run: |
+        zip -qq -r ./deploymenttemplates/ArmTemplates.zip ./${{ env.ARMTEMPLATE_PATH }}
+
+    # Uploading Arm Template to artifact store
+    - name: Upload Arm templates to Artifact
+      continue-on-error: false
+      uses: actions/upload-artifact@v2
+      with:
+        name: deploymenttemplates
+        path: deploymenttemplates
+
+  deploy:
+    name: Deploy application to Azure Function App
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Login to Azure
+      uses: azure/login@v1
+      continue-on-error: false
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 'Install Azure Function App CLI'
+      run: |
+        sudo apt-get update
+        sudo apt-get install azure-functions-core-tools-3
+
+    - name: Download Build Artifact
+      uses: actions/download-artifact@v2
+      continue-on-error: false
+      with:
+        name: buildartifacts
+        path: buildartifacts
+
+    - name: Unzipping Build Artifact
+      run: |
+        unzip -qq ./buildartifacts/Application.zip -d .
+
+    - name: Download Arm Template
+      uses: actions/download-artifact@v2
+      continue-on-error: false
+      with:
+        name: deploymenttemplates
+        path: deploymenttemplates
+
+    - name: Unzipping ARM template
+      run: |
+        unzip -qq ./deploymenttemplates/ArmTemplates.zip -d .
+
+    - name: Deploy ARM Template
+      uses: azure/arm-deploy@v1
+      id: deploy
+      with:
+        scope: resourcegroup
+        subscriptionId: ${{ env.SUBSCRIPTIONID }}
+        resourceGroupName: ${{ env.RESOURCEGROUPNAME }}
+        template: ./"${{ env.ARMTEMPLATE_PATH }}"/windows-functionapp-template.json
+        parameters: functionAppName="${{ env.APPNAME }}" hostingPlanName="${{ env.HOSTINGPLAN }}" appInsightLocation="${{ env.APPINSIGHTSLOCATION }}" storageAccountName="${{ env.STORAGEACCOUNTNAME }}" sku="${{ env.SKU }}"
+
+    # Deploy the Function app to Azure Functions
+    - name: 'Deploy to Azure Function'
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ env.APPNAME }}
+        package: ${{ env.APPLICATIONPATH }}
+
+    - name: Finalizing
+      run: |
+        echo -e "\033[1;32mPlease use Azure portal or Azure Functions Core Tools to fetch url with keys to invoke the Azure function(s)\033[m"
+        echo "func azure functionapp list-functions ${{ env.APPNAME }} --show-keys"
+        echo "It may take upto 10 minutes for the function list to update"
+        func azure functionapp list-functions ${{ env.APPNAME }}

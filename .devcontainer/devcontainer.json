@@ -8,7 +8,7 @@
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
-		"vscode": {			
+		"vscode": {
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"ms-azuretools.vscode-azurefunctions",
@@ -16,6 +16,9 @@
 			]
 		}
 	},
+	"mounts": [
+      "target=/workspaces/azure-functions-demo/app/node_modules,type=volume"
+	],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "npm install",
