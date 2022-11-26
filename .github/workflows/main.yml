@@ -14,7 +14,6 @@ env:
   STORAGEACCOUNTNAME: ${{ github.repository_owner }}demo
   APPINSIGHTSLOCATION: Japan East
   NODE_VERSION: '16.x'
-  SUBSCRIPTIONID: 44603a6b-332f-482f-a1bb-0e9643b3fc4b
   SKU: Dynamic Y1
 
 jobs:
@@ -37,11 +36,11 @@ jobs:
         npm install
 
     # Run Unit Tests
-    - name: Run unit tests
+    - name: Run unit tests with coverage
       continue-on-error: false
       run: |
         cd ${{ env.APPLICATIONPATH }}
-        npm run test
+        npm run test -- --coverage
 
     - name: Make directories for artifact upload
       continue-on-error: false
@@ -49,15 +48,23 @@ jobs:
         mkdir buildartifacts
         mkdir deploymenttemplates
 
+    # Upload Coverage Report
+    - name: Upload Coverage Report
+      continue-on-error: true
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: coverage-report
+        path: ./${{ env.APPLICATIONPATH }}/coverage
+
     # Archive build artifact
     - name: Archive Application
       run: |
-        zip -qq -r ./buildartifacts/Application.zip ./${{ env.APPLICATIONPATH }}
+        zip -qq -r ./buildartifacts/Application.zip ./${{ env.APPLICATIONPATH }} --exclude \*/__test__/\* \*/coverage/\* \*/package.json \*/package-lock.json
 
     # Uploading application to artifact store
     - name: Upload Application to Build Artifact
       continue-on-error: false
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: buildartifacts
         path: buildartifacts
@@ -70,7 +77,7 @@ jobs:
     # Uploading Arm Template to artifact store
     - name: Upload Arm templates to Artifact
       continue-on-error: false
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: deploymenttemplates
         path: deploymenttemplates
@@ -118,7 +125,7 @@ jobs:
       id: deploy
       with:
         scope: resourcegroup
-        subscriptionId: ${{ env.SUBSCRIPTIONID }}
+        subscriptionId: ${{ secrets.SUBSCRIPTIONID }}
         resourceGroupName: ${{ env.RESOURCEGROUPNAME }}
         template: ./"${{ env.ARMTEMPLATE_PATH }}"/arm-template.json
         parameters: functionAppName="${{ env.APPNAME }}" hostingPlanName="${{ env.HOSTINGPLAN }}" appInsightLocation="${{ env.APPINSIGHTSLOCATION }}" storageAccountName="${{ env.STORAGEACCOUNTNAME }}" sku="${{ env.SKU }}"
