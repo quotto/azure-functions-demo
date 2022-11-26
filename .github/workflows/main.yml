@@ -120,7 +120,7 @@ jobs:
         scope: resourcegroup
         subscriptionId: ${{ env.SUBSCRIPTIONID }}
         resourceGroupName: ${{ env.RESOURCEGROUPNAME }}
-        template: ./"${{ env.ARMTEMPLATE_PATH }}"/windows-functionapp-template.json
+        template: ./"${{ env.ARMTEMPLATE_PATH }}"/arm-template.json
         parameters: functionAppName="${{ env.APPNAME }}" hostingPlanName="${{ env.HOSTINGPLAN }}" appInsightLocation="${{ env.APPINSIGHTSLOCATION }}" storageAccountName="${{ env.STORAGEACCOUNTNAME }}" sku="${{ env.SKU }}"
 
     # Deploy the Function app to Azure Functions
