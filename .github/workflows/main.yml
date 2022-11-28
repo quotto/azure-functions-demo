@@ -5,13 +5,13 @@ on:
       - main
 
 env:
-  APPNAME: ${{ github.repository_owner }}-demo-functions
+  APPNAME: ${{ github.actor }}-demo-functions
   APPLICATIONPATH: app
   ARMTEMPLATE_PATH: .arm
-  RESOURCEGROUPNAME: ${{ github.repository_owner }}-demo-rg
+  RESOURCEGROUPNAME: ${{ github.actor }}-demo-rg
   LOCATION: Japan East
-  HOSTINGPLAN: ${{ github.repository_owner }}-demo
-  STORAGEACCOUNTNAME: ${{ github.repository_owner }}demo
+  HOSTINGPLAN: ${{ github.actor }}-demo
+  STORAGEACCOUNTNAME: ${{ github.actor }}demo
   APPINSIGHTSLOCATION: Japan East
   NODE_VERSION: '16.x'
   SKU: Dynamic Y1
