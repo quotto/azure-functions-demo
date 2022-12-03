@@ -4,6 +4,9 @@ on:
     branches-ignore:
       - main
 
+permissions:
+  id-token: write
+
 env:
   APPNAME: ${{ github.actor }}-demo-functions
   APPLICATIONPATH: app
