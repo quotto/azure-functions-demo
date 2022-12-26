@@ -41,7 +41,7 @@ jobs:
         slot-name: stage
   switch-slot:
     runs-on: ubuntu-22.04
-    if: ${{!starstWith(github.ref,'refs/heads/release/')}}
+    if: ${{!startstWith(github.ref,'refs/heads/release/')}}
     steps:
     - name: Switch deploy slot
       uses: azure/CLI@v1
