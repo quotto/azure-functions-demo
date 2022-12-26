@@ -41,11 +41,11 @@ jobs:
         slot-name: stage
   switch-slot:
     runs-on: ubuntu-22.04
-    if: ${{!startsWith(github.ref,'refs/heads/release/')}}
+    if: ${{startsWith(github.ref,'refs/heads/release/')}}
     steps:
     - name: Switch deploy slot
       uses: azure/CLI@v1
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az functionsapp deployment slot swap --slot stage
+          az functionapp deployment slot swap --slot stage
