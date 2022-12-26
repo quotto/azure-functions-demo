@@ -7,6 +7,7 @@ permissions:
   id-token: write
 jobs:
   build-and-deploy:
+    if: ! startsWith(github.ref, "refs/heads/release/")
     runs-on: ubuntu-latest
     environment: development
     steps:
@@ -23,13 +24,6 @@ jobs:
     - name: Packaging
       run: |
         npm install
-    - name: Select slot
-      run: |
-        if [[ ${GITHUB_REF} =~ refs\/heads\/release\/.* ]]; then
-          echo "SLOT_NAME=" >> $GITHUB_ENV
-        else
-          echo "SLOT_NAME=stage" >> $GITHUB_ENV
-        fi
     - name: Login to Azure
       uses: azure/login@v1.4.6
       continue-on-error: false
@@ -44,10 +38,10 @@ jobs:
         app-name: "quotto-demo-functions"
         # Path to package or folder. *.zip or a folder to deploy
         package: .
-        slot-name: ${{env.SLOT_NAME}}
+        slot-name: stage
   switch-slot:
     runs-on: ubuntu-22.04
-    if: startWith(github.ref,"refs/heads/release/")
+    if: ! starstWith(github.ref,"refs/heads/release/")
     steps:
     - name: Switch deploy slot
       uses: azure/CLI@v1
