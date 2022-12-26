@@ -7,7 +7,7 @@ permissions:
   id-token: write
 jobs:
   build-and-deploy:
-    if: ! startsWith(github.ref, "refs/heads/release/")
+    if: ${{!startsWith(github.ref, "refs/heads/release/")}}
     runs-on: ubuntu-latest
     environment: development
     steps:
@@ -41,7 +41,7 @@ jobs:
         slot-name: stage
   switch-slot:
     runs-on: ubuntu-22.04
-    if: ! starstWith(github.ref,"refs/heads/release/")
+    if: ${{!starstWith(github.ref,"refs/heads/release/")}}
     steps:
     - name: Switch deploy slot
       uses: azure/CLI@v1
