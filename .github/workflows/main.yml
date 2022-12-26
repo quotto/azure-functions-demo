@@ -41,7 +41,7 @@ jobs:
       uses: Azure/functions-action@v1.4.8
       with:
         # Name of the Azure Function App
-        app-name: "azure-functions-demo-quotto"
+        app-name: "quotto-demo-functions"
         # Path to package or folder. *.zip or a folder to deploy
         package: .
         slot-name: ${{env.SLOT_NAME}}
