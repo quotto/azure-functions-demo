@@ -1,5 +1,8 @@
 name: Azure Functions Demo
-on: push
+on:
+  push:
+    branches-ignore:
+      - main
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -15,6 +18,13 @@ jobs:
     - name: Packaging
       run: |
         npm install
+    - name: Select slot
+      run: |
+        if [[ ${GITHUB_REF} ~= refs\/heads\/release\/.* ]]; then
+          echo "SLOT_NAME=" >> $GITHUB_ENV
+        else
+          echo "SLOT_NAME=stage" >> $GITHUB_ENV
+        fi
     - name: Azure Functions Action
       uses: Azure/functions-action@v1.4.8
       with:
@@ -24,3 +34,4 @@ jobs:
         package: .
         # Publish profile (*.publishsettings) file contents with web deploy secrets
         publish-profile: ${{secrets.AZURE_FUNCTIONS_PROFILE}}
+        slot-name: ${{env.SLOT_NAME}}
