@@ -20,7 +20,7 @@ jobs:
         npm install
     - name: Select slot
       run: |
-        if [[ ${GITHUB_REF} ~= refs\/heads\/release\/.* ]]; then
+        if [[ ${GITHUB_REF} =~ refs\/heads\/release\/.* ]]; then
           echo "SLOT_NAME=" >> $GITHUB_ENV
         else
           echo "SLOT_NAME=stage" >> $GITHUB_ENV
