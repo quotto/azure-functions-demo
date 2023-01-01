@@ -1,5 +1,5 @@
 const axios = require("axios");
-export class GraphRequester {
+module.exports = class GraphRequester {
     static GRAPH_ENDPOINT = "https://graph.microsoft.com/v1.0";
     static PATH_SIGNIN_USER = "/me";
     static PATH_ALL_TENANT_USER = "/users"

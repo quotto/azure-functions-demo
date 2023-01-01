@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { GraphRequester } = require("../graph");
+const GraphRequester  = require("../graph");
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
