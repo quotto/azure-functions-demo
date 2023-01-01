@@ -25,7 +25,7 @@ jobs:
         node-version: 16.x
     - name: Packaging
       run: |
-        npm install
+        npm install --production
     - name: Login to Azure
       uses: azure/login@v1.4.6
       continue-on-error: false
