@@ -1,4 +1,4 @@
-import axios from "axios";
+const axios = require("axios");
 export class GraphRequester {
     static GRAPH_ENDPOINT = "https://graph.microsoft.com/v1.0";
     static PATH_SIGNIN_USER = "/me";
