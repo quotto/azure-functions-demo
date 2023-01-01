@@ -25,10 +25,11 @@ module.exports = async function (context, req) {
         }
     } else {
         context.log.error("get user token error");
-        context.log.error(`${clientCredentialsResponse.statusText}: ${JSON.stringify(clientCredentialsResponse.data)}`)
+        context.log.error(JSON.stringify(bobResponse));
+        context.log.error(`${bobResponse.statusText}: ${JSON.stringify(bobResponse.data)}`)
         context.res = {
             status: 500,
-            body: JSON.stringify({message: clientCredentialsResponse.data.error, description: clientCredentialsResponse.data.error_description})
+            body: JSON.stringify({message: bobResponse.data.error, description: bobResponse.data.error_description})
         }
     }
 }
@@ -43,7 +44,7 @@ const getGraphApiTokkenWithUserPermission = async(token)=>{
         client_id: process.env.APP_CLIENT_ID,
         client_secret: process.env.APP_CLIENT_SECRET,
         assertion: token,
-        scrop: "User.Read",
+        scrop: "https://graph.microsoft.com/User.Read",
         requested_token_use: "on_behalf_of"
     }
     return await axios.post(`https://login.microsoftonline.com/${process.env.APP_TENANT_ID}/oauth2/v2.0/token`,{headers: headers, data: body}).then(response=>response).catch(error=>error.response)
