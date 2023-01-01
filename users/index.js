@@ -14,16 +14,16 @@ module.exports = async function (context, req) {
                 })
             };
         } else {
-            console.error("graph api request all user profile error");
-            console.error(`${result.statusText}: ${JSON.stringify(result.data)}`)
+            context.log.error("graph api request all user profile error");
+            context.log.error(`${result.statusText}: ${JSON.stringify(result.data)}`)
             context.res = {
                 status: 500,
                 body: JSON.stringify({message: "request all user profile error"})
             }
         }
     } else {
-        console.error("get application token error");
-        console.error(`${clientCredentialsResponse.statusText}: ${JSON.stringify(clientCredentialsResponse.data)}`)
+        context.log.error("get application token error");
+        context.log.error(`${clientCredentialsResponse.statusText}: ${JSON.stringify(clientCredentialsResponse.data)}`)
         context.res = {
             status: 500,
             body: JSON.stringify({message: clientCredentialsResponse.data.error, description: clientCredentialsResponse.data.error_description})
