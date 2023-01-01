@@ -4,7 +4,7 @@ module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
     context.log(JSON.stringify(req));
-    const token = req.headers.Authorization.split(" ")[1];
+    const token = req.headers.authorization.split(" ")[1];
     const bobResponse = await getGraphApiTokkenWithUserPermission(token);
     if(bobResponse.status === 200) {
         const result = await GraphRequester.getMe(bobResponse.data.access_token);
