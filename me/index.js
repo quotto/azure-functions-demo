@@ -46,5 +46,5 @@ const getGraphApiTokkenWithUserPermission = async(token)=>{
         scrop: "User.Read",
         requested_token_use: "on_behalf_of"
     }
-    return await axios.post(`https://login.microsoftonline.com/${process.env.APP_TENANT_ID}/oauth2/v2.0/token`,{headers: headers, data: body}).then(response=>response)
+    return await axios.post(`https://login.microsoftonline.com/${process.env.APP_TENANT_ID}/oauth2/v2.0/token`,{headers: headers, data: body}).then(response=>response).catch(error=>error.response)
 }

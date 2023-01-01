@@ -7,7 +7,7 @@ module.exports = class GraphRequester {
         const headers = {
             Authorization: `Bearer ${token}`
         }
-        return await axios.get(`${this.GRAPH_ENDPOINT}${this.PATH_SIGNIN_USER}`, {headers: headers})
+        return await axios.get(`${this.GRAPH_ENDPOINT}${this.PATH_SIGNIN_USER}`, {headers: headers}).then(response=>response).catch(error=>error.response)
     }
     static async getAllTenantUser(token) {
         const headers = {
