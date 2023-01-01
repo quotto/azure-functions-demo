@@ -3,7 +3,7 @@ const GraphRequester = require("../graph");
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
-    context.debug(JSON.stringify(req));
+    context.log.debug(JSON.stringify(req));
     const token = req.headers.Authorization.split(" ")[1];
     const bobResponse = await getGraphApiTokkenWithUserPermission(token);
     if(bobResponse.status === 200) {
