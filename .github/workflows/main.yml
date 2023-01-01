@@ -1,10 +1,19 @@
 name: Azure Functions Demo
-on: push
+on:
+  push:
+    branches-ignore:
+      - main
+permissions:
+  id-token: write
 jobs:
   build-and-deploy:
+    if: ${{!startsWith(github.ref, 'refs/heads/release/')}}
     runs-on: ubuntu-latest
+    environment: development
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3.1.0
+      with:
+          token: ${{secrets.MY_GITHUB_TOKEN}}
     - name: Setup Node.js environment
       uses: actions/setup-node@v3.5.1
       with:
@@ -15,12 +24,36 @@ jobs:
     - name: Packaging
       run: |
         npm install
+    - name: Login to Azure
+      uses: azure/login@v1.4.6
+      continue-on-error: false
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.SUBSCRIPTIONID }}
     - name: Azure Functions Action
       uses: Azure/functions-action@v1.4.8
       with:
         # Name of the Azure Function App
-        app-name: "azure-functions-demo-quotto"
+        app-name: "quotto-demo-functions"
         # Path to package or folder. *.zip or a folder to deploy
         package: .
-        # Publish profile (*.publishsettings) file contents with web deploy secrets
-        publish-profile: ${{secrets.AZURE_FUNCTIONS_PROFILE}}
+        slot-name: stage
+  swap-slot:
+    runs-on: ubuntu-22.04
+    environment: development
+    if: ${{startsWith(github.ref,'refs/heads/release/')}}
+    steps:
+    - name: Login to Azure
+      uses: azure/login@v1.4.6
+      continue-on-error: false
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.SUBSCRIPTIONID }}
+    - name: Swap deploy slot
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az functionapp deployment slot swap --slot stage --name quotto-demo-functions --resource-group quotto-demo-rg
