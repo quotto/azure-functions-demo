@@ -6,7 +6,7 @@ module.exports = async function (context, req) {
 
     context.log(JSON.stringify(req));
     const token = req.headers.authorization.split(" ")[1];
-    const bobResponse = await getGraphApiTokkenWithUserPermission(token);
+    const bobResponse = await getGraphApiTokkenWithUserPermission(context,token);
     if(!bobResponse.error && bobResponse.status === 200) {
         const result = await GraphRequester.getMe(context,bobResponse.data.access_token);
         if(!result.erro && result.status === 200) {
@@ -28,7 +28,7 @@ module.exports = async function (context, req) {
     }
 }
 
-const getGraphApiTokkenWithUserPermission = async(token)=>{
+const getGraphApiTokkenWithUserPermission = async(context,token)=>{
     const headers = {
         Authorization: `Bearer ${token}`,
         ContentType: "application/json"
