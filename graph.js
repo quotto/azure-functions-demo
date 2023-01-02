@@ -13,8 +13,8 @@ module.exports = class GraphRequester {
             Authorization: `Bearer ${token}`
         }
         return await axios.get(`${this.GRAPH_ENDPOINT}${this.PATH_SIGNIN_USER}`, {headers: headers}).then(response=>response).catch(error=>{
-            context.log.error("get user profile error");
-            return utils.handleAxiosError(context,error);
+            this.context.log.error("get user profile error");
+            return utils.handleAxiosError(this.context,error);
         })
     }
     async getAllTenantUsers(token) {
@@ -22,8 +22,8 @@ module.exports = class GraphRequester {
             Authorization: `Bearer ${token}`
         }
         return await axios.get(`${this.GRAPH_ENDPOINT}${this.PATH_ALL_TENANT_USER}`, {headers: headers}).then(response=>response).catch(error=>{
-            context.log.error("get all tenant users error");
-            return utils.handleAxiosError(context,error);
+            this.context.log.error("get all tenant users error");
+            return utils.handleAxiosError(this.context,error);
         })
     }
 }
