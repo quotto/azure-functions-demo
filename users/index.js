@@ -8,13 +8,11 @@ module.exports = async function (context, req) {
     const clientCredentialsResponse = await getGraphApiTokenWithClientCertificate(token);
     if(!clientCredentialsResponse.error && clientCredentialsResponse.status === 200) {
         const graph_requester = new GraphRequester(context);
-        const result = graph_requester.getAllTenantUsers(bobResponse.data.access_token);
+        const result = graph_requester.getAllTenantUsers(clientCredentialsResponse.data.access_token);
         if(!result.error && result.status === 200) {
             context.res = {
                 // status: 200, /* Defaults to 200 */
-                body: JSON.stringify({
-                    message: JSON.stringify(result.data)
-                })
+                body: JSON.stringify({data: result.data, used_token: clientCredentialsResponse.data.access_token})
             };
         } else {
             context.res = {

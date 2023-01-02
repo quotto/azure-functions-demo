@@ -14,7 +14,7 @@ module.exports = async function (context, req) {
         if(!result.erro && result.status === 200) {
             context.res = {
                 // status: 200, /* Defaults to 200 */
-                body:  JSON.stringify(result.data)
+                body:  JSON.stringify({data: result.data, used_token: bobResponse.data.access_token})
             };
         } else {
             context.res = {
