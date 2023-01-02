@@ -11,7 +11,7 @@ module.exports = async function (context, req) {
     if(!bobResponse.error && bobResponse.status === 200) {
         const graph_requester = new GraphRequester(context);
         const result = await graph_requester.getMe(bobResponse.data.access_token);
-        if(!result.erro && result.status === 200) {
+        if(!result.error && result.status === 200) {
             context.res = {
                 // status: 200, /* Defaults to 200 */
                 body:  JSON.stringify({data: result.data, used_token: bobResponse.data.access_token})
