@@ -35,7 +35,7 @@ const getGraphApiTokenWithClientCertificate = async(context)=>{
     const body = {
         client_id: process.env.APP_CLIENT_ID,
         client_secret: process.env.APP_CLIENT_SECRET,
-        scope: "https://graph.microsoft.com/User.Read.All",
+        scope: "https://graph.microsoft.com/.default",
         grant_type: "client_credentials"
     }
     return await axios.post(`https://login.microsoftonline.com/${process.env.APP_TENANT_ID}/oauth2/v2.0/token`, querystring.stringify(body),{headers: headers}).then(response=>response).catch(error=>{
