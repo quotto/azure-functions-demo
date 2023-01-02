@@ -5,6 +5,7 @@ on:
       - main
 env:
   APP_NAME: super-demo-func
+  APP_DIR: app
 permissions:
   id-token: write
 jobs:
@@ -25,7 +26,8 @@ jobs:
         node-version: 16.x
     - name: Packaging
       run: |
-        npm install --production
+        cd ${APP_DIR}
+        npm run build
     - name: Login to Azure
       uses: azure/login@v1.4.6
       continue-on-error: false
@@ -39,4 +41,4 @@ jobs:
         # Name of the Azure Function App
         app-name: ${{ env.APP_NAME }}
         # Path to package or folder. *.zip or a folder to deploy
-        package: .
+        package: ${{ env.APP_DIR }}

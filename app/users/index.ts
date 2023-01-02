@@ -1,15 +1,14 @@
-const axios = require("axios");
-const querystring = require("querystring");
-const GraphRequester  = require("../graph");
-const { handleAxiosError } = require("../utils");
-module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
-
+import { Context } from "@azure/functions";
+import axios from "axios";
+import querystring from "querystring";
+import { GraphRequester }  from "../graph";
+import { ErrorResponse, handleAxiosError, isErrorResponse } from "../utils";
+export default async function (context: Context) {
     const clientCredentialsResponse = await getGraphApiTokenWithClientCertificate(context);
-    if(!clientCredentialsResponse.error && clientCredentialsResponse.status === 200) {
+    if(!isErrorResponse(clientCredentialsResponse) && clientCredentialsResponse.status === 200) {
         const graph_requester = new GraphRequester(context);
         const result = await graph_requester.getAllTenantUsers(clientCredentialsResponse.data.access_token);
-        if(!result.error && result.status === 200) {
+        if(!isErrorResponse(result) && result.status === 200) {
             context.res = {
                 // status: 200, /* Defaults to 200 */
                 body: JSON.stringify({data: result.data, used_token: clientCredentialsResponse.data.access_token})
@@ -17,18 +16,18 @@ module.exports = async function (context, req) {
         } else {
             context.res = {
                 status: 500,
-                body: JSON.stringify({message: result.message})
+                body: JSON.stringify({message: (result as ErrorResponse).message})
             }
         }
     } else {
         context.res = {
             status: 500,
-            body: JSON.stringify({message: clientCredentialsResponse.message})
+            body: JSON.stringify({message: (clientCredentialsResponse as ErrorResponse).message})
         }
     }
 }
 
-const getGraphApiTokenWithClientCertificate = async(context)=>{
+const getGraphApiTokenWithClientCertificate = async(context: Context)=>{
     const headers = {
         ContentType: "application/json"
     }

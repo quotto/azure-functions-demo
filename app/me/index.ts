@@ -1,17 +1,15 @@
-const axios = require("axios");
-const GraphRequester = require("../graph");
-const querystring = require('querystring');
-const { handleAxiosError } = require("../utils");
-module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
-    context.log(JSON.stringify(req));
-
+import {Context, HttpRequest} from "@azure/functions";
+import axios,{AxiosResponse} from "axios";
+import {GraphRequester} from "../graph";
+import querystring from 'querystring';
+import { handleAxiosError,ErrorResponse, isErrorResponse } from "../utils";
+export default async function (context: Context, req: HttpRequest) {
     const token = req.headers.authorization.split(" ")[1];
     const bobResponse = await getGraphApiTokkenWithUserPermission(context,token);
-    if(!bobResponse.error && bobResponse.status === 200) {
+    if(!isErrorResponse(bobResponse) && bobResponse.status === 200) {
         const graph_requester = new GraphRequester(context);
         const result = await graph_requester.getMe(bobResponse.data.access_token);
-        if(!result.error && result.status === 200) {
+        if(!isErrorResponse(result) && result.status === 200) {
             context.res = {
                 // status: 200, /* Defaults to 200 */
                 body:  JSON.stringify({data: result.data, used_token: bobResponse.data.access_token})
@@ -19,18 +17,18 @@ module.exports = async function (context, req) {
         } else {
             context.res = {
                 status: 500,
-                body: JSON.stringify({message: result.message})
+                body: JSON.stringify({message: (result as ErrorResponse).message})
             }
         }
     } else {
         context.res = {
             status: 500,
-            body: JSON.stringify({message: bobResponse.message})
+            body: JSON.stringify({message: (bobResponse as ErrorResponse).message})
         }
     }
 }
 
-const getGraphApiTokkenWithUserPermission = async(context,token)=>{
+const getGraphApiTokkenWithUserPermission = async(context: Context,token: string): Promise<AxiosResponse | ErrorResponse> =>{
     const headers = {
         Authorization: `Bearer ${token}`,
         ContentType: "application/json"
