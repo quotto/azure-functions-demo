@@ -8,7 +8,7 @@ module.exports = async function (context, req) {
     const token = req.headers.authorization.split(" ")[1];
     const bobResponse = await getGraphApiTokkenWithUserPermission(token);
     if(!bobResponse.error && bobResponse.status === 200) {
-        const result = await GraphRequester.getMe(bobResponse.data.access_token);
+        const result = await GraphRequester.getMe(context,bobResponse.data.access_token);
         if(!result.erro && result.status === 200) {
             context.res = {
                 // status: 200, /* Defaults to 200 */
