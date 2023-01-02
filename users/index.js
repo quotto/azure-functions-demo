@@ -5,7 +5,7 @@ const { handleAxiosError } = require("../utils");
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
-    const clientCredentialsResponse = await getGraphApiTokenWithClientCertificate(token);
+    const clientCredentialsResponse = await getGraphApiTokenWithClientCertificate(context);
     if(!clientCredentialsResponse.error && clientCredentialsResponse.status === 200) {
         const graph_requester = new GraphRequester(context);
         const result = graph_requester.getAllTenantUsers(clientCredentialsResponse.data.access_token);
@@ -28,7 +28,7 @@ module.exports = async function (context, req) {
     }
 }
 
-const getGraphApiTokenWithClientCertificate = async(context,token)=>{
+const getGraphApiTokenWithClientCertificate = async(context)=>{
     const headers = {
         ContentType: "application/json"
     }
