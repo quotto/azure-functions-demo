@@ -27,6 +27,7 @@ jobs:
     - name: Packaging
       run: |
         cd ${APP_DIR}
+        npm run install
         npm run build
     - name: Login to Azure
       uses: azure/login@v1.4.6
