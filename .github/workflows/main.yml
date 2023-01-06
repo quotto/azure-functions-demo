@@ -3,11 +3,10 @@ on:
   push:
     branches-ignore:
       - main
-env:
-  APP_NAME: super-demo-func
-  APP_DIR: app
 permissions:
   id-token: write
+env:
+  APPNAME: ${{ github.actor }}-demo-functions
 jobs:
   build-and-deploy:
     if: ${{!startsWith(github.ref, 'refs/heads/release/')}}
@@ -26,9 +25,7 @@ jobs:
         node-version: 16.x
     - name: Packaging
       run: |
-        cd ${APP_DIR}
         npm install
-        npm run build
     - name: Login to Azure
       uses: azure/login@v1.4.6
       continue-on-error: false
@@ -40,6 +37,61 @@ jobs:
       uses: Azure/functions-action@v1.4.8
       with:
         # Name of the Azure Function App
-        app-name: ${{ env.APP_NAME }}
+        app-name: ${{ env.APPNAME }}
         # Path to package or folder. *.zip or a folder to deploy
-        package: ${{ env.APP_DIR }}
+        package: .
+        slot-name: stage
+    # Slack通知を行う処理
+    - name: Failure notification
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ failure() }}
+      env:
+        SLACK_WEBHOOK:    ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_COLOR:      '#dc143c'  # 赤色の枠で通知が届く
+        SLACK_MESSAGE:     |
+          処理に失敗しました。
+          ログを確認してください。
+
+    - name: Succsess notification
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ success() }}
+      env:
+        SLACK_WEBHOOK:    ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_MESSAGE: |
+          処理に成功しました。
+  swap-slot:
+    runs-on: ubuntu-22.04
+    environment: development
+    if: ${{startsWith(github.ref,'refs/heads/release/')}}
+    steps:
+    - name: Login to Azure
+      uses: azure/login@v1.4.6
+      continue-on-error: false
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.SUBSCRIPTIONID }}
+    - name: Swap deploy slot
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az functionapp deployment slot swap --slot stage --name ${{ env.APPNAME }} --resource-group quotto-demo-rg
+    # Slack通知を行う処理
+    - name: Failure notification
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ failure() }}
+      env:
+        SLACK_WEBHOOK:    ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_COLOR:      '#dc143c'  # 赤色の枠で通知が届く
+        SLACK_MESSAGE:     |
+          処理に失敗しました。
+          ログを確認してください。
+
+    - name: Succsess notification
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ success() }}
+      env:
+        SLACK_WEBHOOK:    ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_MESSAGE: |
+          処理に成功しました。
