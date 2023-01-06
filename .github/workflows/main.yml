@@ -7,6 +7,7 @@ permissions:
   id-token: write
 env:
   APPNAME: ${{ github.actor }}-demo-functions
+  APPDIR: app
 jobs:
   build-and-deploy:
     if: ${{!startsWith(github.ref, 'refs/heads/release/')}}
@@ -25,7 +26,9 @@ jobs:
         node-version: 16.x
     - name: Packaging
       run: |
+        cd ${{ env.APPDIR }}
         npm install
+        npm run build
     - name: Login to Azure
       uses: azure/login@v1.4.6
       continue-on-error: false
@@ -39,7 +42,7 @@ jobs:
         # Name of the Azure Function App
         app-name: ${{ env.APPNAME }}
         # Path to package or folder. *.zip or a folder to deploy
-        package: .
+        package: ${ env.APPDIR }
         slot-name: stage
     # Slack通知を行う処理
     - name: Failure notification
