@@ -1,0 +1,46 @@
+name: Provisioning Resource
+on:
+  create:
+    branches-ignore:
+      - release
+      - release/*
+
+permissions:
+  id-token: write
+
+env:
+  APPNAME: ${{ github.actor }}-demo-functions
+  APPLICATIONPATH: app
+  ARMTEMPLATE_PATH: .arm
+  RESOURCEGROUPNAME: ${{ github.actor }}-demo-rg
+  LOCATION: Japan East
+  HOSTINGPLAN: ${{ github.actor }}-demo
+  STORAGEACCOUNTNAME: ${{ github.actor }}demo
+  APPINSIGHTSLOCATION: Japan East
+  SKU: Dynamic Y1
+
+jobs:
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+    - uses: actions/checkout@v3.1.0
+      with:
+        token: ${{secrets.MY_GITHUB_TOKEN}}
+    - name: Login to Azure
+      uses: azure/login@v1.4.6
+      continue-on-error: false
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.SUBSCRIPTIONID }}
+    - name: Deploy ARM Template
+      uses: azure/arm-deploy@v1
+      id: deploy
+      with:
+        scope: resourcegroup
+        subscriptionId: ${{ secrets.SUBSCRIPTIONID }}
+        resourceGroupName: ${{ env.RESOURCEGROUPNAME }}
+        template: ./"${{ env.ARMTEMPLATE_PATH }}"/arm-template.json
+        parameters: functionAppName="${{ env.APPNAME }}" hostingPlanName="${{ env.HOSTINGPLAN }}" appInsightLocation="${{ env.APPINSIGHTSLOCATION }}" storageAccountName="${{ env.STORAGEACCOUNTNAME }}" sku="${{ env.SKU }}"
