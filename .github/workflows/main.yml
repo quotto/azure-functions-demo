@@ -92,6 +92,8 @@ jobs:
           処理に成功しました。
   swap-slot:
     runs-on: ubuntu-22.04
+    needs:
+      - prebuild
     environment: production
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
