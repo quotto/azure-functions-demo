@@ -23,7 +23,6 @@ jobs:
             echo "slot=stage" >> $GITHUB_OUTPUT
           else
             echo "environment=development" >> $GITHUB_OUTPUT
-            echo "slot=production" >> $GITHUB_OUTPUT
             HASH_VAL=$(echo ${GITHUB_REF} | sha256sum)
             APPNAME=${APPNAME}-${HASH_VAL:0:8}
           fi
