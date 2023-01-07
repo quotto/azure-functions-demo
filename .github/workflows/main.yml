@@ -69,7 +69,7 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          if [ ${github.ref == "refs/heads/release"} ]; then
+          if [ ${{ github.ref }} == "refs/heads/release" ]; then
             SLOT_OPTIONS="--slot ${{ needs.prebuild.outputs.slot }}"
           fi
           az functionapp config appsettings set --name ${{ needs.prebuild.outputs.appname }} --resource-group ${{ env.RESOURCEGROUPNAME }} --settings "API_VERSION=${{ env.API_VERSION }}" ${SLOT_OPTIONS}
