@@ -42,7 +42,7 @@ jobs:
         # Name of the Azure Function App
         app-name: ${{ env.APPNAME }}
         # Path to package or folder. *.zip or a folder to deploy
-        package: ${ env.APPDIR }
+        package: ${{ env.APPDIR }}
         slot-name: stage
     # Slack通知を行う処理
     - name: Failure notification
