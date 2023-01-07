@@ -1,8 +1,6 @@
 name: Azure Functions Demo Deploy
 on:
   push:
-    tags-ignore:
-      - "*"
 permissions:
   id-token: write
 env:
