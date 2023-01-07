@@ -1,15 +1,38 @@
-name: Azure Functions Demo
+name: Azure Functions Demo Deploy
 on:
   push:
-    branches-ignore:
-      - main
 permissions:
   id-token: write
+env:
+  RESOURCEGROUPNAME: ${{ github.actor }}-demo-rg
+  APPDIR: app
+  API_VERSION: v1.2
 jobs:
-  build-and-deploy:
-    if: ${{!startsWith(github.ref, 'refs/heads/release/')}}
+  prebuild:
     runs-on: ubuntu-latest
-    environment: development
+    outputs:
+      environment: ${{ steps.set-environment.outputs.environment }}
+      slot: ${{ steps.set-environment.outputs.slot }}
+      appname: ${{ steps.set-environment.outputs.appname}}
+    steps:
+      - id: set-environment
+        run: |
+          APPNAME=${GITHUB_ACTOR}-demo-functions
+          if [ $GITHUB_REF_NAME == "release" ]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "slot=stage" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+            HASH_VAL=$(echo ${GITHUB_REF} | sha256sum)
+            APPNAME=${APPNAME}-${HASH_VAL:0:8}
+          fi
+          echo "APPNAME=${APPNAME}" >> $GITHUB_OUTPUT
+  build:
+    if: ${{!startsWith(github.ref, 'refs/heads/main')}}
+    runs-on: ubuntu-latest
+    needs:
+      - prebuild
+    environment: ${{ needs.prebuild.outputs.environment }}
     steps:
     - uses: actions/checkout@v3.1.0
       with:
@@ -23,7 +46,9 @@ jobs:
         node-version: 16.x
     - name: Packaging
       run: |
+        cd ${{ env.APPDIR }}
         npm install
+        npm run build
     - name: Login to Azure
       uses: azure/login@v1.4.6
       continue-on-error: false
@@ -35,14 +60,40 @@ jobs:
       uses: Azure/functions-action@v1.4.8
       with:
         # Name of the Azure Function App
-        app-name: "quotto-demo-functions"
+        app-name: ${{ needs.prebuild.outputs.appname }}
         # Path to package or folder. *.zip or a folder to deploy
-        package: .
-        slot-name: stage
+        package: ${{ env.APPDIR }}
+        slot-name: ${{ needs.prebuild.outputs.slot }}
+    - name: Set appsettings
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          if [ ${{ github.ref }} == "refs/heads/release" ]; then
+            SLOT_OPTIONS="--slot ${{ needs.prebuild.outputs.slot }}"
+          fi
+          az functionapp config appsettings set --name ${{ needs.prebuild.outputs.appname }} --resource-group ${{ env.RESOURCEGROUPNAME }} --settings "API_VERSION=${{ env.API_VERSION }}" ${SLOT_OPTIONS}
+    - name: Failure notification
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ failure() }}
+      env:
+        SLACK_WEBHOOK:    ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_COLOR:      '#dc143c'  # 赤色の枠で通知が届く
+        SLACK_MESSAGE:     |
+          処理に失敗しました。
+          ログを確認してください。
+
+    - name: Succsess notification
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ success() }}
+      env:
+        SLACK_WEBHOOK:    ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_MESSAGE: |
+          処理に成功しました。
   swap-slot:
     runs-on: ubuntu-22.04
-    environment: development
-    if: ${{startsWith(github.ref,'refs/heads/release/')}}
+    environment: production
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
     - name: Login to Azure
       uses: azure/login@v1.4.6
@@ -56,4 +107,21 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az functionapp deployment slot swap --slot stage --name quotto-demo-functions --resource-group quotto-demo-rg
+          az functionapp deployment slot swap --slot stage --name ${{ needs.prebuild.outputs.appname }} --resource-group ${{ env.RESOURCEGROUPNAME }}
+    - name: Failure notification
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ failure() }}
+      env:
+        SLACK_WEBHOOK:    ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_COLOR:      '#dc143c'  # 赤色の枠で通知が届く
+        SLACK_MESSAGE:     |
+          処理に失敗しました。
+          ログを確認してください。
+
+    - name: Succsess notification
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ success() }}
+      env:
+        SLACK_WEBHOOK:    ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_MESSAGE: |
+          処理に成功しました。
