@@ -4,7 +4,6 @@ on:
 permissions:
   id-token: write
 env:
-  APPNAME: ${{ github.actor }}-demo-functions
   RESOURCEGROUPNAME: ${{ github.actor }}-demo-rg
   APPDIR: app
   API_VERSION: v1.1
@@ -18,6 +17,7 @@ jobs:
     steps:
       - id: set-environment
         run: |
+          APPNAME=${GITHUB_ACTOR}-demo-functions
           if [ $GITHUB_REF_NAME == "release" ]; then
             echo "name=production" >> $GITHUB_OUTPUT
             echo "slot=stage" >> $GITHUB_OUTPUT
