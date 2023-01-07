@@ -23,7 +23,7 @@ jobs:
             echo "slot=stage" >> $GITHUB_OUTPUT
           else
             echo "name=development" >> $GITHUB_OUTPUT
-            echo "slot=" >> $GITHUB_OUTPUT
+            echo "slot=production" >> $GITHUB_OUTPUT
             HASH_VAL=$(echo ${GITHUB_REF} | sha256sum)
             echo "APPNAME=${APPNAME}-${HASH_VAL:0:8}" >> $GITHUB_ENV
           fi
@@ -69,7 +69,7 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az functionapp config appsettings set -name ${{ env.APPNAME }} --resource-group ${{ env.RESOURCEGROUPNAME }} --settings "API_VERSION=${{ env.API_VERSION }}"
+          az functionapp config appsettings set --name ${{ env.APPNAME }} --resource-group ${{ env.RESOURCEGROUPNAME }} --settings "API_VERSION=${{ env.API_VERSION }}" --slot ${{ needs.prebuild.outputs.slot }}
     - name: Failure notification
       uses: rtCamp/action-slack-notify@v2
       if: ${{ failure() }}
