@@ -47,4 +47,4 @@ jobs:
         subscriptionId: ${{ secrets.SUBSCRIPTIONID }}
         resourceGroupName: ${{ env.RESOURCEGROUPNAME }}
         template: ./"${{ env.ARMTEMPLATE_PATH }}"/arm-template.json
-        parameters: functionAppName="${{ env.APPNAME }}-${{ env.SUFFIX }}" hostingPlanName="${{ env.HOSTINGPLAN }}-${{ env.SUFFIX }}" appInsightLocation="${{ env.APPINSIGHTSLOCATION }}" storageAccountName="${{ env.STORAGEACCOUNTNAME }${{ env.SUFFIX }}}" sku="${{ env.SKU }}"
+        parameters: functionAppName="${{ env.APPNAME }}-${{ env.SUFFIX }}" hostingPlanName="${{ env.HOSTINGPLAN }}-${{ env.SUFFIX }}" appInsightLocation="${{ env.APPINSIGHTSLOCATION }}" storageAccountName="${{ env.STORAGEACCOUNTNAME }${{ env.SUFFIX }}" sku="${{ env.SKU }}"
