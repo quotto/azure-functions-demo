@@ -2,8 +2,8 @@ name: Provisioning Resource
 on:
   create:
     branches-ignore:
-      - release
-      - release/*
+      - "main"
+      - "release"
 
 permissions:
   id-token: write
@@ -28,6 +28,10 @@ jobs:
     - uses: actions/checkout@v3.1.0
       with:
         token: ${{secrets.MY_GITHUB_TOKEN}}
+    - name: Set suffix
+      run: |
+        HASH_VAL=$(echo ${GITHUB_REF} | sha256sum)
+        echo "SUFFIX=${HASH_VAL:0:8}" >> GITHUB_ENV
     - name: Login to Azure
       uses: azure/login@v1.4.6
       continue-on-error: false
@@ -43,4 +47,4 @@ jobs:
         subscriptionId: ${{ secrets.SUBSCRIPTIONID }}
         resourceGroupName: ${{ env.RESOURCEGROUPNAME }}
         template: ./"${{ env.ARMTEMPLATE_PATH }}"/arm-template.json
-        parameters: functionAppName="${{ env.APPNAME }}" hostingPlanName="${{ env.HOSTINGPLAN }}" appInsightLocation="${{ env.APPINSIGHTSLOCATION }}" storageAccountName="${{ env.STORAGEACCOUNTNAME }}" sku="${{ env.SKU }}"
+        parameters: functionAppName="${{ env.APPNAME }}-${{ env.SUFFIX }}" hostingPlanName="${{ env.HOSTINGPLAN }}-${{ env.SUFFIX }}" appInsightLocation="${{ env.APPINSIGHTSLOCATION }}" storageAccountName="${{ env.STORAGEACCOUNTNAME }${{ env.SUFFIX }}}" sku="${{ env.SKU }}"

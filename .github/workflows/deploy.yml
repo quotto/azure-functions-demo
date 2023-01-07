@@ -1,18 +1,39 @@
-name: Azure Functions Demo
+name: Azure Functions Demo Deploy
 on:
   push:
-    branches-ignore:
-      - main
+    tags-ignore:
+      - "*"
 permissions:
   id-token: write
 env:
   APPNAME: ${{ github.actor }}-demo-functions
+  RESOURCEGROUPNAME: ${{ github.actor }}-demo-rg
   APPDIR: app
 jobs:
-  build-and-deploy:
-    if: ${{!startsWith(github.ref, 'refs/heads/release/')}}
+  prebuild:
+    if: ${{ github.ref != 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    environment: development
+    outputs:
+      environment: ${{ steps.set-environment.outputs.name }}
+      slot: ${{ steps.set-environment.outputs.slot }}
+    steps:
+      - id: set-environment
+        run: |
+          if [ $GITHUB_REF_NAME != "release" ]; then
+            echo "name=production" >> $GITHUB_OUTPUTS
+            echo "slot=stage" >> $GITHUB_OUTPUTS
+          else
+            echo "name=development" >> $GITHUB_OUTPUTS
+            echo "slot=" >> $GITHUB_OUTPUTS
+            HASH_VAL=$(echo ${GITHUB_REF} | sha256sum)
+            echo "APPNAME=${APPNAME}-${HASH_VAL:0:8}"
+          fi
+  build:
+    if: ${{!startsWith(github.ref, 'refs/heads/main')}}
+    runs-on: ubuntu-latest
+    needs:
+      - prebuild
+    environment: ${{ needs.prebuild.outputs.environment }}
     steps:
     - uses: actions/checkout@v3.1.0
       with:
@@ -43,8 +64,13 @@ jobs:
         app-name: ${{ env.APPNAME }}
         # Path to package or folder. *.zip or a folder to deploy
         package: ${{ env.APPDIR }}
-        slot-name: stage
-    # Slack通知を行う処理
+        slot-name: ${{ needs.prebuild.outputs.slot }}
+    - name: Set appsettings
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az functionapp config appsettings set -name ${{ env.APPNAME }} --resource-group ${{ env.RESOURCEGROUPNAME }}
     - name: Failure notification
       uses: rtCamp/action-slack-notify@v2
       if: ${{ failure() }}
@@ -64,8 +90,8 @@ jobs:
           処理に成功しました。
   swap-slot:
     runs-on: ubuntu-22.04
-    environment: development
-    if: ${{startsWith(github.ref,'refs/heads/release/')}}
+    environment: production
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
     - name: Login to Azure
       uses: azure/login@v1.4.6
@@ -79,8 +105,7 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az functionapp deployment slot swap --slot stage --name ${{ env.APPNAME }} --resource-group quotto-demo-rg
-    # Slack通知を行う処理
+          az functionapp deployment slot swap --slot stage --name ${{ env.APPNAME }} --resource-group ${{ env.RESOURCEGROUPNAME }}
     - name: Failure notification
       uses: rtCamp/action-slack-notify@v2
       if: ${{ failure() }}
