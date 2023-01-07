@@ -6,27 +6,28 @@ permissions:
 env:
   RESOURCEGROUPNAME: ${{ github.actor }}-demo-rg
   APPDIR: app
-  API_VERSION: v1.1
+  API_VERSION: v1.2
 jobs:
   prebuild:
-    if: ${{ github.ref != 'refs/heads/main' }}
     runs-on: ubuntu-latest
     outputs:
-      environment: ${{ steps.set-environment.outputs.name }}
+      environment: ${{ steps.set-environment.outputs.environment }}
       slot: ${{ steps.set-environment.outputs.slot }}
+      appname: ${{ steps.set-environment.outputs.appname}}
     steps:
       - id: set-environment
         run: |
           APPNAME=${GITHUB_ACTOR}-demo-functions
           if [ $GITHUB_REF_NAME == "release" ]; then
-            echo "name=production" >> $GITHUB_OUTPUT
+            echo "environment=production" >> $GITHUB_OUTPUT
             echo "slot=stage" >> $GITHUB_OUTPUT
           else
-            echo "name=development" >> $GITHUB_OUTPUT
+            echo "environment=development" >> $GITHUB_OUTPUT
             echo "slot=production" >> $GITHUB_OUTPUT
             HASH_VAL=$(echo ${GITHUB_REF} | sha256sum)
-            echo "APPNAME=${APPNAME}-${HASH_VAL:0:8}" >> $GITHUB_ENV
+            APPNAME=${APPNAME}-${HASH_VAL:0:8}
           fi
+          echo "APPNAME=${APPNAME}" >> $GITHUB_OUTPUT
   build:
     if: ${{!startsWith(github.ref, 'refs/heads/main')}}
     runs-on: ubuntu-latest
@@ -60,7 +61,7 @@ jobs:
       uses: Azure/functions-action@v1.4.8
       with:
         # Name of the Azure Function App
-        app-name: ${{ env.APPNAME }}
+        app-name: ${{ needs.prebuild.outputs.appname }}
         # Path to package or folder. *.zip or a folder to deploy
         package: ${{ env.APPDIR }}
         slot-name: ${{ needs.prebuild.outputs.slot }}
@@ -69,7 +70,7 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az functionapp config appsettings set --name ${{ env.APPNAME }} --resource-group ${{ env.RESOURCEGROUPNAME }} --settings "API_VERSION=${{ env.API_VERSION }}" --slot ${{ needs.prebuild.outputs.slot }}
+          az functionapp config appsettings set --name ${{ needs.prebuild.outputs.appnam }} --resource-group ${{ env.RESOURCEGROUPNAME }} --settings "API_VERSION=${{ env.API_VERSION }}" --slot ${{ needs.prebuild.outputs.slot }}
     - name: Failure notification
       uses: rtCamp/action-slack-notify@v2
       if: ${{ failure() }}
@@ -104,7 +105,7 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az functionapp deployment slot swap --slot stage --name ${{ env.APPNAME }} --resource-group ${{ env.RESOURCEGROUPNAME }}
+          az functionapp deployment slot swap --slot stage --name ${{ needs.prebuild.outputs.appname }} --resource-group ${{ env.RESOURCEGROUPNAME }}
     - name: Failure notification
       uses: rtCamp/action-slack-notify@v2
       if: ${{ failure() }}
