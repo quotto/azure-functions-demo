@@ -7,7 +7,7 @@ env:
   APPNAME: ${{ github.actor }}-demo-functions
   RESOURCEGROUPNAME: ${{ github.actor }}-demo-rg
   APPDIR: app
-  API_VERSION: v1
+  API_VERSION: v1.1
 jobs:
   prebuild:
     if: ${{ github.ref != 'refs/heads/main' }}
@@ -25,7 +25,7 @@ jobs:
             echo "name=development" >> $GITHUB_OUTPUT
             echo "slot=" >> $GITHUB_OUTPUT
             HASH_VAL=$(echo ${GITHUB_REF} | sha256sum)
-            echo "APPNAME=${APPNAME}-${HASH_VAL:0:8}"
+            echo "APPNAME=${APPNAME}-${HASH_VAL:0:8}" >> $GITHUB_ENV
           fi
   build:
     if: ${{!startsWith(github.ref, 'refs/heads/main')}}
