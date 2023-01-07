@@ -70,7 +70,7 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az functionapp config appsettings set --name ${{ needs.prebuild.outputs.appnam }} --resource-group ${{ env.RESOURCEGROUPNAME }} --settings "API_VERSION=${{ env.API_VERSION }}" --slot ${{ needs.prebuild.outputs.slot }}
+          az functionapp config appsettings set --name ${{ needs.prebuild.outputs.appname }} --resource-group ${{ env.RESOURCEGROUPNAME }} --settings "API_VERSION=${{ env.API_VERSION }}" --slot ${{ needs.prebuild.outputs.slot }}
     - name: Failure notification
       uses: rtCamp/action-slack-notify@v2
       if: ${{ failure() }}
