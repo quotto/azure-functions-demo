@@ -27,11 +27,9 @@ jobs:
             APPNAME=${APPNAME}-${HASH_VAL:0:8}
           fi
           echo "APPNAME=${APPNAME}" >> $GITHUB_OUTPUT
-  build:
+  test:
     if: ${{!startsWith(github.ref, 'refs/heads/main')}}
     runs-on: ubuntu-latest
-    needs:
-      - prebuild
     environment: ${{ needs.prebuild.outputs.environment }}
     steps:
     - uses: actions/checkout@v3.1.0
@@ -44,10 +42,49 @@ jobs:
         always-auth: false
         # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
         node-version: 16.x
-    - name: Packaging
+    - name: Build
       run: |
         cd ${{ env.APPDIR }}
         npm install
+    - name: Test
+      run: |
+        npm run test
+    - name: Archive coverage report
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: ${{ env.APPDIR }}/coverage
+    - name: Failure notification
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ failure() }}
+      env:
+        SLACK_WEBHOOK:    ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_COLOR:      '#dc143c'  # 赤色の枠で通知が届く
+        SLACK_MESSAGE:     |
+          処理に失敗しました。
+          ログを確認してください。
+  build:
+    if: ${{!startsWith(github.ref, 'refs/heads/main')}}
+    runs-on: ubuntu-latest
+    needs:
+      - prebuild
+      - test
+    environment: ${{ needs.prebuild.outputs.environment }}
+    steps:
+    - uses: actions/checkout@v3.1.0
+      with:
+          token: ${{secrets.MY_GITHUB_TOKEN}}
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v3.5.1
+      with:
+        # Set always-auth in npmrc.
+        always-auth: false
+        # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
+        node-version: 16.x
+    - name: Build
+      run: |
+        cd ${{ env.APPDIR }}
+        npm install --production
         npm run build
     - name: Login to Azure
       uses: azure/login@v1.4.6
@@ -56,7 +93,7 @@ jobs:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.SUBSCRIPTIONID }}
-    - name: Azure Functions Action
+    - name: Deploy
       uses: Azure/functions-action@v1.4.8
       with:
         # Name of the Azure Function App

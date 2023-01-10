@@ -16,6 +16,9 @@
 			]
 		}
 	},
+	"mounts": [
+      "target=/workspaces/azure-functions-demo/app/node_modules"
+	],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "npm install",

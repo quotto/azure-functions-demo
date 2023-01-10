@@ -49,3 +49,5 @@ __azurite_db*__.json
 
 app/dist
 app/node_modules
+
+app/coverage

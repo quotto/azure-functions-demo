@@ -11,6 +11,7 @@ FROM mcr.microsoft.com/azure-functions/node:4-node16-core-tools
 # [Optional] Uncomment if you want to run your Function locally with
 # local.settings.json using `"AzureWebJobsStorage": "UseDevelopmentStorage=true"`
 RUN sudo -u node npm install -g typescript azure-functions-core-tools
+RUN export PATH=${PATH}:./node_modules/.bin
 
 # [Optional] Uncomment if you want to install more global node packages
 # RUN sudo -u node npm install -g <your-package-list-here>
