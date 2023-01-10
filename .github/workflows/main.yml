@@ -85,7 +85,7 @@ jobs:
     - name: Build
       run: |
         cd ${{ env.APPDIR }}
-        npm install --production
+        npm install --omit=production
         npm run build
     - name: Login to Azure
       uses: azure/login@v1.4.6
