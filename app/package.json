@@ -5,7 +5,7 @@
   "scripts": {
     "start": "func start",
     "prestart": "npm run build",
-    "build": "tsc",
+    "build": "tsc --exclude __tests__",
     "test": "jest"
   },
   "dependencies": {
