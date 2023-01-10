@@ -48,6 +48,7 @@ jobs:
         npm install
     - name: Test
       run: |
+        cd ${{ env.APPDIR }}
         npm run test
     - name: Archive coverage report
       uses: actions/upload-artifact@v2
