@@ -33,7 +33,7 @@ describe("me",()=>{
     const mockContext: any = {};
 
     await me(mockContext,  mockRequest);
-    expect(mockFn.mock.calls[0][1]).toBe("12345678");
+    expect(mockFn.mock.calls[0][0]).toBe("12345678");
     expect(mockContext.res?.status).toBe(500);
   });
   it("success",async()=>{
@@ -68,7 +68,7 @@ describe("me",()=>{
     const mockContext: any = {};
     await me(mockContext, mockRequest);
 
-    expect(mockTokenFn.mock.calls[0][1]).toBe("12345678");
+    expect(mockTokenFn.mock.calls[0][0]).toBe("12345678");
     expect(mockGraphFn.mock.calls[0][0]).toBe("987654321");
     expect(mockContext.res?.status).toBe(200);
     expect(mockContext.res?.body).toBe(JSON.stringify({
