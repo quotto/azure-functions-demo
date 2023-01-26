@@ -29,5 +29,5 @@
 		"ghcr.io/frntn/devcontainers-features/postman:1": {},
 		"ghcr.io/devcontainers-contrib/features/typescript:2": {}
 	},
-	"postStartCommand": "export PATH=${PATH}:./node_modules/.bin"
+	"postStartCommand": "echo PATH=$PATH:./node_modules/.bin >> $HOME/.profile"
 }
