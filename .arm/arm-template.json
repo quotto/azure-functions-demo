@@ -20,6 +20,9 @@
         },
         "appInsightLocation": {
             "type": "string"
+        },
+        "cosmosDBConnection": {
+            "type": "string"
         }
     },
     "resources": [
@@ -121,6 +124,10 @@
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
                             "value": "~16"
+                        },
+                        {
+                            "name": "COSMOSDB_CONNECTION",
+                            "value": "[parameters('cosmosDBConnection')]"
                         }
                     ]
                 },
