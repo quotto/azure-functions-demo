@@ -51,3 +51,5 @@ app/dist
 app/node_modules
 
 app/coverage
+
+.devcontainer/openvpn-tmp

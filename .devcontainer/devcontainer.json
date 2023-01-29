@@ -3,11 +3,8 @@
 	"image": "mcr.microsoft.com/azure-functions/node:4-node16-core-tools",
 	"forwardPorts": [ 7071 ],
 
-	// Configure tool-specific properties.
 	"customizations": {
-		// Configure properties specific to VS Code.
 		"vscode": {
-			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"ms-azuretools.vscode-azurefunctions",
 				"dbaeumer.vscode-eslint"
@@ -17,11 +14,6 @@
 	"mounts": [
       "target=/workspaces/azure-functions-demo/app/node_modules"
 	],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "npm install",
-
-	// Set `remoteUser` to `root` to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "node",
 	"features": {
 		"ghcr.io/devcontainers/features/azure-cli:1": {},
@@ -29,6 +21,7 @@
 		"ghcr.io/frntn/devcontainers-features/postman:1": {},
 		"ghcr.io/devcontainers-contrib/features/typescript:2": {}
 	},
+	"runArgs": ["--cap-add=NET_ADMIN", "--cap-add=NET_RAW", "--device=/dev/net/tun"],
 	"initializeCommand": "bash .devcontainer/save-config.sh",
 	"onCreateCommand": "sudo bash .devcontainer/initialize.sh",
 	"postStartCommand": "bash .devcontainer/start-vpn.sh"
