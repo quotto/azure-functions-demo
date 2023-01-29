@@ -30,6 +30,6 @@
 		"ghcr.io/devcontainers-contrib/features/typescript:2": {}
 	},
 	"initializeCommand": "bash .devcontainer/save-config.sh",
-	"onCreateCommand": "bash .devcontainer/initialize.sh",
+	"onCreateCommand": "sudo bash .devcontainer/initialize.sh",
 	"postStartCommand": "bash .devcontainer/start-vpn.sh"
 }
