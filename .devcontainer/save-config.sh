@@ -9,5 +9,5 @@ cd openvpn-tmp
 
 # Save the configuration from the secret if it is present
 if [ ! -z "${OPENVPN_CONFIG}" ]; then
-    echo "${OPENVPN_CONFIG}" > vpnconfig.ovpn
+    echo -n "${OPENVPN_CONFIG}" | base64 -d > vpnconfig.ovpn
 fi
