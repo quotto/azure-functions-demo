@@ -29,6 +29,7 @@
 		"ghcr.io/frntn/devcontainers-features/postman:1": {},
 		"ghcr.io/devcontainers-contrib/features/typescript:2": {}
 	},
-	"initializeCommand": "bash .devcontainer/initialize.sh",
-	"postStartCommand": "echo PATH=$PATH:./node_modules/.bin >> $HOME/.profile"
+	"initializeCommand": "bash .devcontainer/save-config.sh",
+	"onCreateCommand": "bash .devcontainer/initialize.sh",
+	"postStartCommand": "bash .devcontainer/start-vpn.sh"
 }
