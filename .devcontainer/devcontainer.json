@@ -21,7 +21,7 @@
 		"ghcr.io/frntn/devcontainers-features/postman:1": {},
 		"ghcr.io/devcontainers-contrib/features/typescript:2": {}
 	},
-	"runArgs": ["--cap-add=NET_ADMIN", "--cap-add=NET_RAW", "--device=/dev/net/tun", "--dns=10.0.100.4"],
+	"runArgs": ["--cap-add=NET_ADMIN", "--cap-add=NET_RAW", "--device=/dev/net/tun", "--dns=10.0.100.4", "--dns=8.8.8.8"],
 	"initializeCommand": "bash .devcontainer/save-config.sh",
 	"onCreateCommand": "sudo bash .devcontainer/initialize.sh",
 	"postStartCommand": "bash .devcontainer/start-vpn.sh"
