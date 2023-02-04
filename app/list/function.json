@@ -6,8 +6,9 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "post"
-      ]
+        "get"
+      ],
+      "route":"list/{date}"
     },
     {
       "type": "http",
@@ -15,14 +16,15 @@
       "name": "res"
     },
     {
-      "name": "outDocument",
+      "name": "inDocument",
       "type": "cosmosDB",
       "databaseName": "InOut",
       "collectionName": "InOut",
       "createIfNotExists": true,
       "connectionStringSetting": "COSMOSDB_CONNECTION",
-      "direction": "out"
+      "direction": "in",
+      "sqlQuery": "SELECT * from c where c.date = {date}",
     }
   ],
-  "scriptFile": "../dist/update/index.js"
+  "scriptFile": "../dist/list/index.js"
 }
